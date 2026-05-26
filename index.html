@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="XORE Pure Android — Uninstall pre-installed bloatware from your mobile phone. Free up RAM, reclaim storage, and restore pure performance.">
+    <meta name="theme-color" content="#0b0f19">
+    <title>XORE Pure Android — Debloat. Reclaim. Perform.</title>
+    <style>
+        /* ===== CSS RESET & BASE ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --obsidian: #0b0f19;
+            --obsidian-deep: #070a12;
+            --obsidian-elevated: #111827;
+            --obsidian-card: #141c2b;
+            --neon-cyan: #00f0ff;
+            --neon-cyan-dim: rgba(0, 240, 255, 0.18);
+            --neon-cyan-glow: rgba(0, 240, 255, 0.45);
+            --neon-cyan-ghost: rgba(0, 240, 255, 0.08);
+            --neon-magenta: #d400ff;
+            --text-primary: #e8edf4;
+            --text-secondary: #a0b4cc;
+            --text-muted: #5e6f85;
+            --border-sharp: 6px;
+            --border-thin: 1px;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --transition-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+            --nav-height: 68px;
+            --max-width: 1280px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 16px;
+            background-color: var(--obsidian);
+            color: var(--text-primary);
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--obsidian);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            isolation: isolate;
+        }
+
+        /* ===== SUBTLE BACKGROUND GRID & NOISE TEXTURE ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background:
+                /* Subtle dot grid */
+                radial-gradient(circle at 1px 1px, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse at 50% 30%, black 40%, transparent 72%);
+            -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 40%, transparent 72%);
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.025;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.008) 2px,
+                    rgba(255, 255, 255, 0.008) 4px);
+            mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 70%);
+        }
+
+        /* ===== SCROLLBAR STYLING ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--obsidian-deep);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--obsidian-elevated);
+            border-radius: 3px;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e2a3c;
+            border-color: rgba(0, 240, 255, 0.35);
+        }
+
+        /* ===== SELECTION ===== */
+        ::selection {
+            background: rgba(0, 240, 255, 0.25);
+            color: #fff;
+        }
+
+        /* ===== NAVIGATION BAR ===== */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px;
+            transition: background var(--transition-smooth), box-shadow var(--transition-smooth),
+                border-color var(--transition-smooth);
+            background: rgba(11, 15, 25, 0.72);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border-bottom: var(--border-thin) solid rgba(0, 240, 255, 0.08);
+        }
+
+        .nav--scrolled {
+            background: rgba(11, 15, 25, 0.92);
+            border-bottom: var(--border-thin) solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 240, 255, 0.06) inset;
+        }
+
+        .nav__inner {
+            width: 100%;
+            max-width: var(--max-width);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+        }
+
+        .nav__logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+            transition: opacity var(--transition-fast);
+        }
+        .nav__logo:hover {
+            opacity: 0.85;
+        }
+        .nav__logo-icon {
+            width: 38px;
+            height: 38px;
+            border: var(--border-thin) solid var(--neon-cyan);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--obsidian-elevated);
+            box-shadow: 0 0 14px var(--neon-cyan-dim), inset 0 0 6px var(--neon-cyan-ghost);
+            position: relative;
+            flex-shrink: 0;
+        }
+        .nav__logo-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: var(--neon-cyan);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 5px var(--neon-cyan-glow));
+        }
+        .nav__logo-text {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: 0.04em;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+        .nav__logo-text span {
+            color: var(--neon-cyan);
+        }
+
+        .nav__links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+        }
+        .nav__links a {
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            color: var(--text-secondary);
+            transition: color var(--transition-fast);
+            position: relative;
+            padding: 4px 0;
+        }
+        .nav__links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 8px var(--neon-cyan-glow);
+            transition: width var(--transition-fast);
+            border-radius: 1px;
+        }
+        .nav__links a:hover,
+        .nav__links a:focus-visible {
+            color: #fff;
+        }
+        .nav__links a:hover::after,
+        .nav__links a:focus-visible::after {
+            width: 100%;
+        }
+
+        .nav__cta {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            color: var(--obsidian-deep);
+            background: var(--neon-cyan);
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            border: var(--border-thin) solid var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan-dim), 0 0 40px rgba(0, 240, 255, 0.1);
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .nav__cta:hover,
+        .nav__cta:focus-visible {
+            background: #00d4e0;
+            box-shadow: 0 0 30px var(--neon-cyan-glow), 0 0 60px rgba(0, 240, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Menu Toggle */
+        .nav__toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            flex-shrink: 0;
+        }
+        .nav__toggle span {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: var(--neon-cyan);
+            margin: 6px 0;
+            border-radius: 2px;
+            transition: all var(--transition-fast);
+            box-shadow: 0 0 6px var(--neon-cyan-dim);
+        }
+        .nav__toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .nav__toggle.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .nav__toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* Mobile Menu Panel */
+        .nav__mobile {
+            display: none;
+            position: fixed;
+            top: var(--nav-height);
+            left: 0;
+            right: 0;
+            background: rgba(11, 15, 25, 0.96);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border-bottom: var(--border-thin) solid rgba(0, 240, 255, 0.15);
+            padding: 20px 24px 28px;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 999;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+        }
+        .nav__mobile.open {
+            display: flex;
+        }
+        .nav__mobile a {
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            padding: 10px 0;
+            border-bottom: var(--border-thin) solid rgba(255, 255, 255, 0.05);
+            transition: color var(--transition-fast);
+        }
+        .nav__mobile a:hover {
+            color: var(--neon-cyan);
+        }
+        .nav__mobile .nav__cta {
+            display: inline-block;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            padding-top: var(--nav-height);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            position: relative;
+            min-height: calc(100vh - var(--nav-height));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px 80px;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        /* Hero ambient glows */
+        .hero__glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        .hero__glow--cyan {
+            top: -15%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.18) 0%, transparent 70%);
+            animation: heroGlowPulse 6s ease-in-out infinite;
+        }
+        .hero__glow--magenta {
+            bottom: -20%;
+            left: -12%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(212, 0, 255, 0.12) 0%, transparent 70%);
+            animation: heroGlowPulse 8s ease-in-out 2s infinite;
+        }
+        @keyframes heroGlowPulse {
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.12);
+            }
+        }
+
+        .hero__inner {
+            width: 100%;
+            max-width: var(--max-width);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero__content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--neon-cyan);
+            border: var(--border-thin) solid rgba(0, 240, 255, 0.35);
+            border-radius: 2px;
+            padding: 8px 14px;
+            width: fit-content;
+            background: var(--neon-cyan-ghost);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 0 16px var(--neon-cyan-dim);
+        }
+        .hero__badge-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan-glow);
+            animation: dotBlink 1.6s ease-in-out infinite;
+        }
+        @keyframes dotBlink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.25;
+            }
+        }
+
+        .hero__title {
+            font-family: var(--font-mono);
+            font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
+        }
+        .hero__title span {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 50px var(--neon-cyan-glow);
+        }
+
+        .hero__subtitle {
+            font-size: 1.08rem;
+            color: var(--text-secondary);
+            max-width: 440px;
+            line-height: 1.7;
+        }
+
+        .hero__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .btn {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .btn--primary {
+            background: var(--neon-cyan);
+            color: var(--obsidian-deep);
+            border: var(--border-thin) solid var(--neon-cyan);
+            box-shadow: 0 0 24px var(--neon-cyan-dim), 0 0 48px rgba(0, 240, 255, 0.08);
+        }
+        .btn--primary:hover,
+        .btn--primary:focus-visible {
+            background: #00dce8;
+            box-shadow: 0 0 36px var(--neon-cyan-glow), 0 0 64px rgba(0, 240, 255, 0.18);
+            transform: translateY(-2px);
+        }
+        .btn--ghost {
+            background: transparent;
+            color: var(--neon-cyan);
+            border: var(--border-thin) solid rgba(0, 240, 255, 0.45);
+            box-shadow: 0 0 12px var(--neon-cyan-ghost);
+        }
+        .btn--ghost:hover,
+        .btn--ghost:focus-visible {
+            background: var(--neon-cyan-ghost);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 24px var(--neon-cyan-dim);
+            transform: translateY(-2px);
+        }
+
+        .hero__stats {
+            display: flex;
+            gap: 28px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .hero__stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .hero__stat-value {
+            font-family: var(--font-mono);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.02em;
+        }
+        .hero__stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* Hero Visual */
+        .hero__visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .hero__phone-frame {
+            width: 240px;
+            height: 460px;
+            border: var(--border-sharp) solid rgba(0, 240, 255, 0.5);
+            border-radius: 28px;
+            background: var(--obsidian-card);
+            position: relative;
+            box-shadow:
+                0 0 40px var(--neon-cyan-dim),
+                0 0 80px rgba(0, 240, 255, 0.06),
+                inset 0 0 30px rgba(0, 240, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: phoneFloat 5s ease-in-out infinite;
+        }
+        @keyframes phoneFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-14px);
+            }
+        }
+        .hero__phone-screen {
+            width: 88%;
+            height: 88%;
+            background: var(--obsidian-deep);
+            border-radius: 16px;
+            border: var(--border-thin) solid rgba(0, 240, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero__phone-screen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 3px,
+                    rgba(0, 240, 255, 0.015) 3px,
+                    rgba(0, 240, 255, 0.015) 6px);
+            pointer-events: none;
+        }
+        .hero__phone-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 70, 70, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 50, 50, 0.1);
+            box-shadow: 0 0 20px rgba(255, 60, 60, 0.3);
+        }
+        .hero__phone-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: #ff5555;
+            fill: none;
+            stroke-width: 2;
+        }
+        .hero__phone-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 70%;
+            margin-top: 8px;
+        }
+        .hero__phone-line {
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            width: 100%;
+        }
+        .hero__phone-line--short {
+            width: 60%;
+        }
+        .hero__phone-line--cyan {
+            background: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 8px var(--neon-cyan-dim);
+            width: 80%;
+        }
+        .hero__phone-text {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Decorative corner accents on hero phone */
+        .hero__phone-frame::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 22px;
+            height: 22px;
+            border-top: 3px solid var(--neon-cyan);
+            border-right: 3px solid var(--neon-cyan);
+            border-radius: 0 6px 0 0;
+            box-shadow: 0 0 10px var(--neon-cyan-dim);
+        }
+
+        /* ===== PLACEHOLDER SECTIONS ===== */
+        .section-placeholder {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: var(--border-thin) dashed rgba(0, 240, 255, 0.2);
+        }
+        .section-placeholder__label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-placeholder__label::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--neon-cyan-dim);
+        }
+        .section-placeholder__box {
+            border: var(--border-sharp) dashed rgba(0, 240, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: 32px;
+            background: rgba(0, 240, 255, 0.015);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+        }
+        .section-placeholder__box:hover {
+            border-color: rgba(0, 240, 255, 0.55);
+            background: rgba(0, 240, 255, 0.03);
+        }
+
+        /* ===== HOW IT WORKS SECTION ===== */
+        .hiw-section {
+            padding: 100px 24px;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,240,255,0.08);
+            border: 1px solid rgba(0,240,255,0.2);
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--neon-cyan);
+            letter-spacing: 0.06em;
+            margin-bottom: 16px;
+        }
+        .section-badge-dot {
+            width: 6px; height: 6px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--neon-cyan);
+            display: inline-block;
+        }
+        .section-heading {
+            font-family: var(--font-mono);
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        .section-heading span { color: var(--neon-cyan); }
+        .section-sub {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* Step cards */
+        .hiw-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-top: 56px;
+        }
+        .hiw-step {
+            background: var(--obsidian-card);
+            border: 1px solid rgba(0,240,255,0.12);
+            border-radius: var(--radius-md);
+            padding: 32px 24px;
+            position: relative;
+            transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+        }
+        .hiw-step:hover {
+            border-color: rgba(0,240,255,0.4);
+            box-shadow: 0 0 28px rgba(0,240,255,0.08);
+        }
+        .hiw-step__num {
+            font-family: var(--font-mono);
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: rgba(0,240,255,0.12);
+            line-height: 1;
+            margin-bottom: 16px;
+            letter-spacing: -0.04em;
+        }
+        .hiw-step__icon {
+            width: 44px; height: 44px;
+            border: 1px solid rgba(0,240,255,0.3);
+            border-radius: var(--radius-sm);
+            background: var(--obsidian-elevated);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 0 12px rgba(0,240,255,0.08);
+        }
+        .hiw-step__icon svg {
+            width: 22px; height: 22px;
+            stroke: var(--neon-cyan); fill: none; stroke-width: 2;
+        }
+        .hiw-step__title {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .hiw-step__desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+        .hiw-connector {
+            display: none;
+        }
+        @media (min-width: 900px) {
+            .hiw-steps {
+                grid-template-columns: repeat(4, 1fr);
+                position: relative;
+            }
+        }
+
+        /* ===== FEATURES SECTION ===== */
+        .features-section {
+            padding: 100px 24px;
+            background: rgba(7,10,18,0.55);
+            border-top: 1px solid rgba(0,240,255,0.07);
+        }
+        .features-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 56px;
+        }
+        .feat-card {
+            background: var(--obsidian-card);
+            border: 1px solid rgba(0,240,255,0.1);
+            border-radius: var(--radius-md);
+            padding: 28px 24px;
+            transition: border-color var(--transition-smooth), transform var(--transition-smooth), box-shadow var(--transition-smooth);
+        }
+        .feat-card:hover {
+            border-color: rgba(0,240,255,0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(0,240,255,0.06);
+        }
+        .feat-card--highlight {
+            border-color: rgba(0,240,255,0.3);
+            background: linear-gradient(135deg, rgba(0,240,255,0.04) 0%, var(--obsidian-card) 60%);
+        }
+        .feat-card__icon {
+            width: 48px; height: 48px;
+            border-radius: var(--radius-sm);
+            background: rgba(0,240,255,0.08);
+            border: 1px solid rgba(0,240,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px;
+        }
+        .feat-card__icon svg {
+            width: 24px; height: 24px;
+            stroke: var(--neon-cyan); fill: none; stroke-width: 2;
+        }
+        .feat-card__title {
+            font-family: var(--font-mono);
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: 0.01em;
+        }
+        .feat-card__desc {
+            font-size: 0.87rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+        .feat-card__tag {
+            display: inline-block;
+            margin-top: 14px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--neon-cyan);
+            background: rgba(0,240,255,0.07);
+            border: 1px solid rgba(0,240,255,0.18);
+            border-radius: 2px;
+            padding: 3px 8px;
+        }
+
+        /* ===== PRICING SECTION ===== */
+        .pricing-section {
+            padding: 100px 24px;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 56px;
+            align-items: start;
+        }
+        .price-card {
+            background: var(--obsidian-card);
+            border: 1px solid rgba(0,240,255,0.12);
+            border-radius: var(--radius-md);
+            padding: 36px 28px;
+            position: relative;
+            transition: box-shadow var(--transition-smooth);
+        }
+        .price-card--featured {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 40px rgba(0,240,255,0.12), inset 0 0 40px rgba(0,240,255,0.03);
+        }
+        .price-card__badge {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--neon-cyan);
+            color: var(--obsidian-deep);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 4px 14px;
+            border-radius: 2px;
+            white-space: nowrap;
+        }
+        .price-card__label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .price-card__amount {
+            font-family: var(--font-mono);
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+        .price-card__amount sup {
+            font-size: 1.2rem;
+            vertical-align: super;
+            font-weight: 600;
+            color: var(--neon-cyan);
+        }
+        .price-card__once {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-top: 4px;
+            margin-bottom: 24px;
+        }
+        .price-card__divider {
+            border: none;
+            border-top: 1px solid rgba(0,240,255,0.1);
+            margin-bottom: 24px;
+        }
+        .price-card__features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .price-card__features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+        .price-card__features li svg {
+            width: 15px; height: 15px;
+            stroke: var(--neon-cyan); fill: none; stroke-width: 2.5;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .price-cta {
+            display: block;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            padding: 13px 24px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+        .price-cta--primary {
+            background: var(--neon-cyan);
+            color: var(--obsidian-deep);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0,240,255,0.25);
+        }
+        .price-cta--primary:hover { background: #00dce8; box-shadow: 0 0 36px rgba(0,240,255,0.5); transform: translateY(-1px); }
+        .price-cta--ghost {
+            background: transparent;
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0,240,255,0.35);
+        }
+        .price-cta--ghost:hover { background: rgba(0,240,255,0.06); border-color: var(--neon-cyan); transform: translateY(-1px); }
+
+        /* ===== ABOUT SECTION ===== */
+        .about-section {
+            padding: 100px 24px;
+            background: rgba(7,10,18,0.55);
+            border-top: 1px solid rgba(0,240,255,0.07);
+        }
+        .about-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+        @media (max-width: 900px) {
+            .about-inner { grid-template-columns: 1fr; gap: 40px; }
+        }
+        .about-content .section-sub {
+            margin: 0;
+            max-width: none;
+            text-align: left;
+        }
+        .about-body {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin-top: 20px;
+        }
+        .about-body + .about-body { margin-top: 14px; }
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 36px;
+        }
+        .about-stat {
+            background: var(--obsidian-card);
+            border: 1px solid rgba(0,240,255,0.1);
+            border-radius: var(--radius-md);
+            padding: 20px 18px;
+        }
+        .about-stat__value {
+            font-family: var(--font-mono);
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+        .about-stat__value span { color: var(--neon-cyan); }
+        .about-stat__label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+        .about-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .about-terminal {
+            background: var(--obsidian-deep);
+            border: 1px solid rgba(0,240,255,0.2);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.8;
+            box-shadow: 0 0 32px rgba(0,0,0,0.5), 0 0 20px rgba(0,240,255,0.04);
+        }
+        .about-terminal__bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .about-terminal__dot {
+            width: 10px; height: 10px; border-radius: 50%;
+        }
+        .about-terminal__dot:nth-child(1) { background: #ff5f57; }
+        .about-terminal__dot:nth-child(2) { background: #febc2e; }
+        .about-terminal__dot:nth-child(3) { background: #28c840; }
+        .term-line { display: flex; gap: 10px; }
+        .term-prompt { color: rgba(0,240,255,0.5); flex-shrink: 0; }
+        .term-cmd { color: var(--text-primary); }
+        .term-out { color: var(--text-muted); padding-left: 20px; }
+        .term-success { color: #4ade80; padding-left: 20px; }
+        .term-cyan { color: var(--neon-cyan); }
+        .term-blink { animation: dotBlink 1s step-end infinite; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            border-top: var(--border-thin) solid rgba(0, 240, 255, 0.1);
+            padding: 32px 24px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+            background: var(--obsidian-deep);
+        }
+        .footer span {
+            color: var(--neon-cyan);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .hero__inner {
+                grid-template-columns: 1fr;
+                gap: 36px;
+                text-align: center;
+            }
+            .hero__content {
+                align-items: center;
+                text-align: center;
+            }
+            .hero__subtitle {
+                max-width: 100%;
+            }
+            .hero__stats {
+                justify-content: center;
+            }
+            .hero__actions {
+                justify-content: center;
+            }
+            .hero__phone-frame {
+                width: 180px;
+                height: 360px;
+                border-width: 5px;
+            }
+            .nav__links {
+                display: none;
+            }
+            .nav__cta-desktop {
+                display: none;
+            }
+            .nav__toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 901px) {
+            .nav__toggle {
+                display: none;
+            }
+            .nav__mobile {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 40px 16px 60px;
+            }
+            .hero__stats {
+                gap: 16px;
+            }
+            .hero__stat-value {
+                font-size: 1.3rem;
+            }
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.78rem;
+            }
+            .hero__phone-frame {
+                width: 150px;
+                height: 300px;
+                border-width: 4px;
+                border-radius: 22px;
+            }
+            .hero__phone-screen {
+                border-radius: 12px;
+            }
+        }
+
+        /* =====================================================================
+           TAILWIND CDN FALLBACK — Modal positioning & visibility
+           These rules replicate the Tailwind utility classes used on
+           #userActionModal and its inner panel. They are written as plain CSS
+           so the modal works correctly even when the Tailwind CDN is blocked
+           (ad-blockers, strict CSP, slow/offline connections).
+
+           The selectors are deliberately lower-specificity than Tailwind's
+           generated utilities, so they act purely as a safety-net: when
+           Tailwind loads normally, its classes win; when it doesn't, these
+           kick in automatically — no JavaScript required.
+        ===================================================================== */
+
+        /* Overlay — full-screen centred backdrop */
+        #userActionModal {
+            position: fixed;
+            inset: 0;                          /* top/right/bottom/left: 0 */
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.80);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+
+        /* hidden utility — Tailwind adds/removes this class via JS */
+        #userActionModal.hidden {
+            display: none !important;
+        }
+
+        /* Inner panel */
+        #userActionModal > div {
+            background-color: #0b0f19;
+            border: 2px solid rgba(0, 240, 255, 0.40);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 56rem;          /* max-w-4xl ≈ 896 px */
+            margin-left: 1rem;
+            margin-right: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0 60px rgba(0, 240, 255, 0.30);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Tab bar row */
+        #userActionModal .tab-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.50);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Hidden sections managed by JS — ensure they actually hide */
+        #loginSection.hidden,
+        #placeOrderSection.hidden,
+        #cancelOrderSection.hidden {
+            display: none !important;
+        }
+
+        /* Close button baseline */
+        #closeUserModalBtn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: #9ca3af;
+        }
+        #closeUserModalBtn:hover {
+            color: #ffffff;
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="nav" id="navbar" role="banner">
+        <div class="nav__inner">
+            <a href="#" class="nav__logo" aria-label="XORE Pure Android Home">
+                <div class="nav__logo-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="5" y1="5" x2="19" y2="19" />
+                        <line x1="19" y1="5" x2="5" y2="19" />
+                    </svg>
+                </div>
+                <span class="nav__logo-text">XORE<span>//</span>Pure</span>
+            </a>
+
+            <nav aria-label="Main navigation">
+                <ul class="nav__links">
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </nav>
+
+            <button id="homeMenuBtn" class="nav__cta nav__cta-desktop" aria-label="Open User Dashboard">
+    🏠 Home
+</button>
+
+            <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <div class="nav__mobile" id="navMobile" role="navigation" aria-label="Mobile navigation">
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#about">About</a>
+            <button id="mobileHomeMenuBtn" class="nav__cta">🏠 Home</button>
+        </div>
+    </header>
+
+    <main class="main" role="main">
+
+        <section class="hero" id="hero" aria-labelledby="hero-heading">
+            <div class="hero__glow hero__glow--cyan" aria-hidden="true"></div>
+            <div class="hero__glow hero__glow--magenta" aria-hidden="true"></div>
+
+            <div class="hero__inner">
+                <div class="hero__content">
+                    <div class="hero__badge">
+                        <span class="hero__badge-dot" aria-hidden="true"></span>
+                        Pure Android Performance
+                    </div>
+
+                    <h1 class="hero__title" id="hero-heading">
+                        Rip Out <span>Bloatware</span>.<br>Reclaim Your <span>RAM</span>.
+                    </h1>
+
+                    <p class="hero__subtitle">
+                        XORE Pure Android surgically uninstalls pre-installed junk from your phone.
+                        No root required. Free up gigabytes of RAM and storage safely.
+                    </p>
+
+                    <div class="hero__actions">
+                        <a href="#get-started" class="btn btn--primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                            Start Debloating
+                        </a>
+                        <a href="#how-it-works" class="btn btn--ghost">
+                            See How It Works
+                        </a>
+                    </div>
+
+                    <div class="hero__stats">
+                        <div class="hero__stat">
+                            <span class="hero__stat-value">2.1GB</span>
+                            <span class="hero__stat-label">Avg RAM Freed</span>
+                        </div>
+                        <div class="hero__stat">
+                            <span class="hero__stat-value">8.4GB</span>
+                            <span class="hero__stat-label">Storage Reclaimed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero__visual" aria-hidden="true">
+                    <div class="hero__phone-frame">
+                        <div class="hero__phone-screen">
+                            <div class="hero__phone-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                </svg>
+                            </div>
+                            <div class="hero__phone-lines">
+                                <div class="hero__phone-line"></div>
+                                <div class="hero__phone-line hero__phone-line--short"></div>
+                                <div class="hero__phone-line hero__phone-line--cyan"></div>
+                                <div class="hero__phone-line"></div>
+                                <div class="hero__phone-line hero__phone-line--short"></div>
+                            </div>
+                            <span class="hero__phone-text">Bloatware Detected…</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== HOW IT WORKS ===== -->
+        <section id="how-it-works" aria-labelledby="hiw-heading" style="border-top: 1px solid rgba(0,240,255,0.07);">
+            <div class="hiw-section">
+                <div style="text-align:center; margin-bottom:0;">
+                    <div class="section-badge">
+                        <span class="section-badge-dot"></span>
+                        THE PROCESS
+                    </div>
+                    <h2 class="section-heading" id="hiw-heading">
+                        Four Steps to <span>Pure Android</span>
+                    </h2>
+                    <p class="section-sub">No root. No warranty void. No risk. Just a faster, cleaner phone in under 30 minutes.</p>
+                </div>
+
+                <div class="hiw-steps">
+
+                    <div class="hiw-step">
+                        <div class="hiw-step__num">01</div>
+                        <div class="hiw-step__icon">
+                            <svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                        </div>
+                        <div class="hiw-step__title">Fill the Form</div>
+                        <p class="hiw-step__desc">Submit your device details, address, and preferred payment method through our secure ingestion form.</p>
+                    </div>
+
+                    <div class="hiw-step">
+                        <div class="hiw-step__num">02</div>
+                        <div class="hiw-step__icon">
+                            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="hiw-step__title">Drop Off Device</div>
+                        <p class="hiw-step__desc">Bring your phone to the nearest XORE partner shop node. We'll confirm receipt and give you a tracking ID.</p>
+                    </div>
+
+                    <div class="hiw-step">
+                        <div class="hiw-step__num">03</div>
+                        <div class="hiw-step__icon">
+                            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </div>
+                        <div class="hiw-step__title">We Debloat</div>
+                        <p class="hiw-step__desc">Our technician surgically removes pre-installed bloatware via ADB. Average completion time: under 30 minutes.</p>
+                    </div>
+
+                    <div class="hiw-step">
+                        <div class="hiw-step__num">04</div>
+                        <div class="hiw-step__icon">
+                            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="hiw-step__title">Collect &amp; Enjoy</div>
+                        <p class="hiw-step__desc">Pick up your debloated device. Experience the difference — faster RAM, more storage, zero junkware.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FEATURES ===== -->
+        <section id="features" aria-labelledby="features-heading" class="features-section">
+            <div class="features-inner">
+                <div style="text-align:center;">
+                    <div class="section-badge">
+                        <span class="section-badge-dot"></span>
+                        WHAT YOU GET
+                    </div>
+                    <h2 class="section-heading" id="features-heading">
+                        Built for Real <span>Performance</span>
+                    </h2>
+                    <p class="section-sub">Every feature is designed around one goal — giving your phone back its full potential.</p>
+                </div>
+
+                <div class="features-grid">
+
+                    <div class="feat-card feat-card--highlight">
+                        <div class="feat-card__icon">
+                            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <div class="feat-card__title">2.1 GB Average RAM Freed</div>
+                        <p class="feat-card__desc">Removing background bloatware apps frees up significant RAM your phone was silently consuming. Multitasking becomes fluid again.</p>
+                        <span class="feat-card__tag">PERFORMANCE</span>
+                    </div>
+
+                    <div class="feat-card">
+                        <div class="feat-card__icon">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="feat-card__title">No Root Required</div>
+                        <p class="feat-card__desc">We use Android Debug Bridge (ADB) — a legitimate tool built into Android itself. No root exploits, no warranty voiding, no risk.</p>
+                        <span class="feat-card__tag">SAFE</span>
+                    </div>
+
+                    <div class="feat-card">
+                        <div class="feat-card__icon">
+                            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                        </div>
+                        <div class="feat-card__title">8.4 GB Storage Reclaimed</div>
+                        <p class="feat-card__desc">Bloatware and its hidden data caches quietly eat your storage. We remove them cleanly and permanently.</p>
+                        <span class="feat-card__tag">STORAGE</span>
+                    </div>
+
+                    <div class="feat-card">
+                        <div class="feat-card__icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div class="feat-card__title">Safe &amp; Reversible</div>
+                        <p class="feat-card__desc">Apps are disabled or uninstalled using standard Android APIs. A factory reset would restore them if ever needed.</p>
+                        <span class="feat-card__tag">REVERSIBLE</span>
+                    </div>
+
+                    <div class="feat-card">
+                        <div class="feat-card__icon">
+                            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        </div>
+                        <div class="feat-card__title">Flat ₹99 Fee — No Hidden Charges</div>
+                        <p class="feat-card__desc">One transparent price covers the full debloating session regardless of device brand, model, or number of apps removed.</p>
+                        <span class="feat-card__tag">TRANSPARENT</span>
+                    </div>
+
+                    <div class="feat-card">
+                        <div class="feat-card__icon">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="feat-card__title">Done in Under 30 Minutes</div>
+                        <p class="feat-card__desc">Drop off your phone, grab a chai. Our technicians work fast — most debloating sessions complete in 20–30 minutes.</p>
+                        <span class="feat-card__tag">FAST</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PRICING ===== -->
+        <section id="pricing" aria-labelledby="pricing-heading" class="pricing-section">
+            <div style="text-align:center;">
+                <div class="section-badge">
+                    <span class="section-badge-dot"></span>
+                    PRICING
+                </div>
+                <h2 class="section-heading" id="pricing-heading">
+                    Simple, <span>Honest</span> Pricing
+                </h2>
+                <p class="section-sub">One service, one price. No tiers, no upsells, no surprises at checkout.</p>
+            </div>
+
+            <div class="pricing-grid">
+
+                <!-- Self-service (info only) -->
+                <div class="price-card">
+                    <div class="price-card__label">DIY / SELF-SERVICE</div>
+                    <div class="price-card__amount"><sup>₹</sup>0</div>
+                    <div class="price-card__once">Free — if you do it yourself</div>
+                    <hr class="price-card__divider">
+                    <ul class="price-card__features">
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ADB debloat guide provided</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Community support only</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Requires PC + USB cable</li>
+                        <li style="opacity:0.45;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> No technician support</li>
+                        <li style="opacity:0.45;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> No partner shop access</li>
+                    </ul>
+                    <a href="#how-it-works" class="price-cta price-cta--ghost">Learn DIY Method</a>
+                </div>
+
+                <!-- XORE Standard (featured) -->
+                <div class="price-card price-card--featured">
+                    <div class="price-card__badge">MOST POPULAR</div>
+                    <div class="price-card__label">XORE STANDARD SERVICE</div>
+                    <div class="price-card__amount"><sup>₹</sup>99</div>
+                    <div class="price-card__once">One-time · per device</div>
+                    <hr class="price-card__divider">
+                    <ul class="price-card__features">
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Full bloatware removal by technician</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> RAM freed: avg 2.1 GB</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Storage reclaimed: avg 8.4 GB</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> No root · no warranty void</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Done in under 30 minutes</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> UPI / NetBanking / COD accepted</li>
+                    </ul>
+                    <a href="#get-started" class="price-cta price-cta--primary">Book Now — ₹99</a>
+                </div>
+
+                <!-- Partner node -->
+                <div class="price-card">
+                    <div class="price-card__label">PARTNER SHOPKEEPER</div>
+                    <div class="price-card__amount"><sup>₹</sup>49<span style="font-size:1.4rem;color:var(--text-muted)">.50</span></div>
+                    <div class="price-card__once">per device · 50% of every ₹99 fee</div>
+                    <hr class="price-card__divider">
+                    <ul class="price-card__features">
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Earn 50% of every service fee</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Weekly Monday payouts</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> PartnerHub dashboard access</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Unique Shop Node ID issued</li>
+                        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Training &amp; onboarding included</li>
+                    </ul>
+                    <a href="#partners" class="price-cta price-cta--ghost">Become a Partner</a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===== ABOUT ===== -->
+        <section id="about" aria-labelledby="about-heading" class="about-section">
+            <div class="about-inner">
+                <div class="about-content">
+                    <div class="section-badge" style="margin-bottom:16px;">
+                        <span class="section-badge-dot"></span>
+                        ABOUT XORE
+                    </div>
+                    <h2 class="section-heading" id="about-heading" style="text-align:left;">
+                        Why We Built <span>XORE</span>
+                    </h2>
+                    <p class="about-body">
+                        India ships hundreds of millions of Android phones every year — and nearly all of them arrive pre-loaded with bloatware: carrier apps, OEM utilities, ad platforms, and background services that silently drain RAM and storage from day one.
+                    </p>
+                    <p class="about-body">
+                        XORE Pure Android was built to fix this. We partner with local mobile repair shops across India to bring professional-grade debloating to every neighbourhood — at a price that's less than a cup of coffee.
+                    </p>
+                    <p class="about-body" style="color:var(--text-muted); font-size:0.85rem;">
+                        Built with FastAPI · SQLite · ADB · Pure HTML — no frameworks, no bloat.
+                    </p>
+
+                    <div class="about-stats">
+                        <div class="about-stat">
+                            <div class="about-stat__value">₹<span>99</span></div>
+                            <div class="about-stat__label">Flat service fee</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="about-stat__value"><span>50</span>%</div>
+                            <div class="about-stat__label">Partner payout</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="about-stat__value"><span>&lt;30</span></div>
+                            <div class="about-stat__label">Minutes per device</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="about-stat__value"><span>0</span></div>
+                            <div class="about-stat__label">Root required</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-visual">
+                    <div class="about-terminal">
+                        <div class="about-terminal__bar">
+                            <div class="about-terminal__dot"></div>
+                            <div class="about-terminal__dot"></div>
+                            <div class="about-terminal__dot"></div>
+                        </div>
+                        <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd">adb shell pm list packages -3</span></div>
+                        <div class="term-out">package:com.facebook.system</div>
+                        <div class="term-out">package:com.amazon.kindle</div>
+                        <div class="term-out">package:com.miui.analytics</div>
+                        <div class="term-out">package:com.miui.msa.global</div>
+                        <div class="term-out">package:com.qualcomm.qti.perfdump</div>
+                        <div class="term-out">... 43 packages found</div>
+                        <br>
+                        <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd">xore --debloat --safe --no-root</span></div>
+                        <div class="term-success">✓ Scanning bloatware manifest…</div>
+                        <div class="term-success">✓ Removing 43 packages via ADB…</div>
+                        <div class="term-success">✓ RAM freed: <span class="term-cyan">2.1 GB</span></div>
+                        <div class="term-success">✓ Storage reclaimed: <span class="term-cyan">8.4 GB</span></div>
+                        <div class="term-success">✓ Device is now <span class="term-cyan">XORE Pure</span> <span class="term-blink">_</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="partners" aria-labelledby="partners-heading"
+         style="padding: 80px 24px; background: rgba(7,10,18,0.6);
+                border-top: 1px solid rgba(0,240,255,0.08);">
+
+    <!-- Section heading -->
+    <div style="text-align:center; margin-bottom: 40px; max-width: var(--max-width); margin: 0 auto 40px;">
+        <div style="display:inline-flex; align-items:center; gap:8px;
+                    background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.2);
+                    border-radius:4px; padding:6px 14px; font-family:var(--font-mono);
+                    font-size:0.78rem; color:var(--neon-cyan); letter-spacing:0.06em; margin-bottom:16px;">
+            <span style="width:6px;height:6px;background:var(--neon-cyan);border-radius:50%;
+                         box-shadow:0 0 6px var(--neon-cyan);display:inline-block;"></span>
+            PARTNER NETWORK
+        </div>
+        <h2 id="partners-heading"
+            style="font-family:var(--font-mono); font-size:clamp(1.6rem,4vw,2.4rem);
+                   font-weight:700; color:var(--text-primary); margin-bottom:12px;">
+            Become a <span style="color:var(--neon-cyan);">Shop Node</span>
+        </h2>
+        <p style="color:var(--text-secondary); font-size:0.95rem; max-width:520px; margin:0 auto;">
+            Partner shopkeepers earn
+            <strong style="color:var(--neon-cyan);">50% of every ₹99 service fee</strong>.
+            Register your shop as an XORE node.
+        </p>
+    </div>
+
+    <!-- iframe — parterhub.html load hoga yahan -->
+    <iframe
+        src="partnerhub.html"
+        id="partnerFrame"
+        title="XORE Partner Hub Dashboard"
+        scrolling="auto"
+        style="width: 100%;
+               min-height: 780px;
+               border: none;
+               border-radius: 8px;
+               display: block;
+               background: transparent;">
+    </iframe>
+
+    <!-- CTA button — full page mein open karne ke liye -->
+    <div style="text-align:center; margin-top: 24px;">
+        <a href="partnerhub.html" target="_blank"
+           style="display:inline-flex; align-items:center; gap:8px;
+                  border:2px solid var(--neon-cyan); color:var(--neon-cyan);
+                  font-family:var(--font-mono); font-weight:700; font-size:0.85rem;
+                  text-transform:uppercase; letter-spacing:0.08em;
+                  padding:12px 28px; border-radius:4px; text-decoration:none;
+                  transition:all 0.2s; background:transparent;"
+           onmouseover="this.style.background='rgba(0,240,255,0.1)'"
+           onmouseout="this.style.background='transparent'">
+            ⚡ Open Full Partner Dashboard
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+
+        </section>
+
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <p>&copy; 2026 <span>XORE Pure Android</span>. All rights reserved. Debloat with precision.</p>
+    </footer>
+
+    <!-- ─── User Dashboard Modal ──────────────────────────── -->
+<div id="userActionModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden" aria-hidden="true">
+    <div class="bg-[#0b0f19] border-2 border-[#00f0ff]/40 rounded-lg w-full max-w-4xl mx-4 p-6 shadow-[0_0_60px_rgba(0,240,255,0.3)] relative max-h-[90vh] overflow-y-auto">
+        
+        <div class="flex items-center justify-between mb-6 border-b border-[#00f0ff]/20 pb-4">
+            <h2 class="text-xl font-mono text-white font-bold">User Dashboard</h2>
+            <button id="closeUserModalBtn" class="text-gray-400 hover:text-white text-2xl leading-none" aria-label="Close">&times;</button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex space-x-4 mb-6 border-b border-gray-700/50 pb-2">
+            <button id="tabLogin" class="text-[#00f0ff] font-mono text-sm font-bold border-b-2 border-[#00f0ff] pb-1">Login / Sign Up</button>
+            <button id="tabOrder" class="text-gray-400 font-mono text-sm hover:text-white pb-1">Place Order</button>
+            <button id="tabCancel" class="text-gray-400 font-mono text-sm hover:text-white pb-1">Cancel Order</button>
+        </div>
+
+        <!-- ─── Login / Sign Up Section ──────────────────── -->
+        <div id="loginSection">
+            <p class="text-sm text-gray-300 font-mono mb-4">Sign in to access your dashboard</p>
+            <form id="authForm" class="space-y-3">
+                <div>
+                    <input type="text" id="authUserId" placeholder="Username / Email" 
+                           class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-2 focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff] font-mono text-sm">
+                </div>
+                <div>
+                    <input type="password" id="authPassword" placeholder="Password" 
+                           class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-2 focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff] font-mono text-sm">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" id="registerBtn" class="bg-[#00f0ff] text-[#0b0f19] font-bold font-mono text-sm uppercase px-6 py-2 rounded hover:bg-[#00d4e0] transition">Sign Up</button>
+                    <button type="button" id="loginBtn" class="border border-[#00f0ff] text-[#00f0ff] font-mono text-sm uppercase px-6 py-2 rounded hover:bg-[#00f0ff]/10 transition">Log In</button>
+                </div>
+            </form>
+            <p id="authStatus" class="mt-3 text-xs font-mono text-center"></p>
+        </div>
+
+        <!-- ─── Place Order Section ──────────────────────── -->
+        <div id="placeOrderSection" class="hidden">
+            <iframe src="user_form.html" id="modalFormFrame" title="XORE Device Ingestion Form"
+                scrolling="auto" style="width: 100%; min-height: 850px; border: none; border-radius: 4px; display: block; background: transparent;">
+            </iframe>
+        </div>
+
+        <!-- ─── Cancel Order Section ────────────────────── -->
+        <div id="cancelOrderSection" class="hidden py-4">
+
+            <!-- Mode toggle: logged-in user vs guest -->
+            <div class="flex gap-2 mb-4">
+                <button id="cancelModeAuth" class="flex-1 py-1.5 rounded font-mono text-xs font-bold uppercase border border-[#00f0ff] bg-[#00f0ff]/10 text-[#00f0ff] transition-all">
+                    Logged-in User
+                </button>
+                <button id="cancelModeGuest" class="flex-1 py-1.5 rounded font-mono text-xs font-bold uppercase border border-gray-600 text-gray-400 hover:border-gray-400 transition-all">
+                    Guest (no account)
+                </button>
+            </div>
+
+            <!-- Shared: Order ID field -->
+            <div class="mb-3">
+                <label class="block text-xs text-gray-400 font-mono mb-1">Order ID <span class="text-[#00f0ff]">*</span></label>
+                <input type="text" id="cancelOrderId" placeholder="e.g. 3f2a1b4c-…"
+                       class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3 focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff] font-mono text-sm">
+            </div>
+
+            <!-- Guest-only: cancellation token field (hidden for auth mode) -->
+            <div id="guestTokenRow" class="hidden mb-3">
+                <label class="block text-xs text-gray-400 font-mono mb-1">
+                    Guest Cancellation Token <span class="text-[#00f0ff]">*</span>
+                </label>
+                <textarea id="cancelGuestToken" rows="3" placeholder="Paste the token you received when you placed your order…"
+                          class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3 focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff] font-mono text-xs resize-none"></textarea>
+                <p class="mt-1 text-xs text-gray-500 font-mono">⚠ This token was shown once after you submitted your order. If you lost it, contact XORE support.</p>
+            </div>
+
+            <button id="cancelOrderBtn"
+                    class="w-full bg-red-900/30 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white px-6 py-3 rounded font-bold font-mono text-sm uppercase transition-all">
+                Cancel Order
+            </button>
+
+            <p id="cancelOrderStatus" class="mt-3 text-xs font-mono text-center"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    (function() {
+        'use strict';
+
+        // ─── DOM References ──────────────────────────────────
+        const navbar = document.getElementById('navbar');
+        const navToggle = document.getElementById('navToggle');
+        const navMobile = document.getElementById('navMobile');
+
+        // --- Scroll-aware Navbar ---
+        function updateNavbarStyle() {
+            const scrollY = window.scrollY;
+            if (scrollY > 20) {
+                navbar.classList.add('nav--scrolled');
+            } else {
+                navbar.classList.remove('nav--scrolled');
+            }
+        }
+
+        // --- Mobile Menu Toggle ---
+        function toggleMobileMenu() {
+            const isOpen = navMobile.classList.contains('open');
+            if (isOpen) {
+                navMobile.classList.remove('open');
+                navToggle.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+            } else {
+                navMobile.classList.add('open');
+                navToggle.classList.add('active');
+                navToggle.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        function closeMobileMenu() {
+            navMobile.classList.remove('open');
+            navToggle.classList.remove('active');
+            navToggle.setAttribute('aria-expanded', 'false');
+        }
+
+
+        // Close mobile menu when a link inside it is clicked
+        navMobile.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close mobile menu on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && navMobile.classList.contains('open')) {
+                closeMobileMenu();
+                navToggle.focus();
+            }
+        });
+
+        // --- Initial State ---
+        updateNavbarStyle();
+
+        // --- Smooth scroll for anchor links (progressive enhancement) ---
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    const navHeight = navbar.offsetHeight;
+                    const targetPosition =
+                        targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth',
+                    });
+                }
+            });
+        });
+
+        // ─── Modal & Tab Logic ──────────────────────────────
+        const modal = document.getElementById('userActionModal');
+        const openModalBtn = document.getElementById('homeMenuBtn');
+        const closeModalBtn = document.getElementById('closeUserModalBtn');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabOrder = document.getElementById('tabOrder');
+        const tabCancel = document.getElementById('tabCancel');
+        const loginSection = document.getElementById('loginSection');
+        const placeOrderSection = document.getElementById('placeOrderSection');
+        const cancelOrderSection = document.getElementById('cancelOrderSection');
+        const authUserId = document.getElementById('authUserId');
+        const authPassword = document.getElementById('authPassword');
+        const authStatus = document.getElementById('authStatus');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const cancelOrderInput = document.getElementById('cancelOrderId');
+        const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+        const cancelOrderStatus = document.getElementById('cancelOrderStatus');
+
+        // Modal Open/Close
+        if (openModalBtn) {
+            openModalBtn.addEventListener('click', function() {
+                if (modal) modal.classList.remove('hidden');
+                switchTab('login');
+            });
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', function() {
+                if (modal) modal.classList.add('hidden');
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        }
+
+        // Tab Switching
+        function switchTab(tab) {
+            // Reset all tabs
+            [tabLogin, tabOrder, tabCancel].forEach(function(btn) {
+                if (btn) {
+                    btn.classList.remove('text-[#00f0ff]', 'border-b-2', 'border-[#00f0ff]');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+            
+            if (loginSection) loginSection.classList.add('hidden');
+            if (placeOrderSection) placeOrderSection.classList.add('hidden');
+            if (cancelOrderSection) cancelOrderSection.classList.add('hidden');
+
+            // FIX: clear stale guest token when leaving the cancel tab so an old
+            // token from a previous session doesn't confuse the user on return.
+            if (tab !== 'cancel') {
+                var gt = document.getElementById('cancelGuestToken');
+                if (gt) gt.value = '';
+            }
+
+            if (tab === 'login' && tabLogin && loginSection) {
+                tabLogin.classList.remove('text-gray-400');
+                tabLogin.classList.add('text-[#00f0ff]', 'border-b-2', 'border-[#00f0ff]');
+                loginSection.classList.remove('hidden');
+            } else if (tab === 'order' && tabOrder && placeOrderSection) {
+                tabOrder.classList.remove('text-gray-400');
+                tabOrder.classList.add('text-[#00f0ff]', 'border-b-2', 'border-[#00f0ff]');
+                placeOrderSection.classList.remove('hidden');
+            } else if (tab === 'cancel' && tabCancel && cancelOrderSection) {
+                tabCancel.classList.remove('text-gray-400');
+                tabCancel.classList.add('text-[#00f0ff]', 'border-b-2', 'border-[#00f0ff]');
+                cancelOrderSection.classList.remove('hidden');
+            }
+        }
+
+        if (tabLogin) tabLogin.addEventListener('click', function() { switchTab('login'); });
+        if (tabOrder) tabOrder.addEventListener('click', function() { switchTab('order'); });
+        if (tabCancel) tabCancel.addEventListener('click', function() { switchTab('cancel'); });
+
+        // Helper: Store Token & Update UI
+        function handleAuthSuccess(token) {
+            localStorage.setItem('authToken', token);
+            if (authStatus) {
+                authStatus.textContent = "✅ Logged in!";
+                authStatus.className = "mt-3 text-xs font-mono text-green-400";
+            }
+            setTimeout(function() {
+                switchTab('order');
+            }, 1000);
+        }
+
+        // Register
+        if (registerBtn) {
+            registerBtn.addEventListener('click', async function() {
+                if (authStatus) authStatus.textContent = '';
+                const userId = authUserId ? authUserId.value.trim() : '';
+                const password = authPassword ? authPassword.value.trim() : '';
+                
+                if (!userId || !password) {
+                    if (authStatus) {
+                        authStatus.textContent = "❌ Fill in both fields.";
+                        authStatus.className = "mt-3 text-xs font-mono text-red-400";
+                    }
+                    return;
+                }
+                
+                try {
+                    const res = await fetch('/api/v1/user/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId, password: password })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || 'Registration failed');
+                    if (authStatus) {
+                        authStatus.textContent = "✅ Registered! Now log in.";
+                        authStatus.className = "mt-3 text-xs font-mono text-green-400";
+                    }
+                } catch (err) {
+                    if (authStatus) {
+                        authStatus.textContent = "❌ " + err.message;
+                        authStatus.className = "mt-3 text-xs font-mono text-red-400";
+                    }
+                }
+            });
+        }
+
+        // Login
+        if (loginBtn) {
+            loginBtn.addEventListener('click', async function() {
+                if (authStatus) authStatus.textContent = '';
+                const userId = authUserId ? authUserId.value.trim() : '';
+                const password = authPassword ? authPassword.value.trim() : '';
+                
+                if (!userId || !password) {
+                    if (authStatus) {
+                        authStatus.textContent = "❌ Fill in both fields.";
+                        authStatus.className = "mt-3 text-xs font-mono text-red-400";
+                    }
+                    return;
+                }
+                
+                try {
+                    const res = await fetch('/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId, password: password })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || 'Login failed');
+                    handleAuthSuccess(data.access_token);
+                } catch (err) {
+                    if (authStatus) {
+                        authStatus.textContent = "❌ " + err.message;
+                        authStatus.className = "mt-3 text-xs font-mono text-red-400";
+                    }
+                }
+            });
+        }
+
+        // ── Cancel Order — mode toggle ──────────────────────────────────────
+        var cancelModeAuth    = document.getElementById('cancelModeAuth');
+        var cancelModeGuest   = document.getElementById('cancelModeGuest');
+        var guestTokenRow     = document.getElementById('guestTokenRow');
+        var cancelGuestToken  = document.getElementById('cancelGuestToken');
+        var isGuestCancelMode = false;
+
+        function setCancelMode(guest) {
+            isGuestCancelMode = guest;
+            if (guest) {
+                cancelModeGuest.classList.add('border-[#00f0ff]', 'bg-[#00f0ff]/10', 'text-[#00f0ff]');
+                cancelModeGuest.classList.remove('border-gray-600', 'text-gray-400');
+                cancelModeAuth.classList.remove('border-[#00f0ff]', 'bg-[#00f0ff]/10', 'text-[#00f0ff]');
+                cancelModeAuth.classList.add('border-gray-600', 'text-gray-400');
+                if (guestTokenRow) guestTokenRow.classList.remove('hidden');
+            } else {
+                cancelModeAuth.classList.add('border-[#00f0ff]', 'bg-[#00f0ff]/10', 'text-[#00f0ff]');
+                cancelModeAuth.classList.remove('border-gray-600', 'text-gray-400');
+                cancelModeGuest.classList.remove('border-[#00f0ff]', 'bg-[#00f0ff]/10', 'text-[#00f0ff]');
+                cancelModeGuest.classList.add('border-gray-600', 'text-gray-400');
+                if (guestTokenRow) guestTokenRow.classList.add('hidden');
+            }
+        }
+
+        if (cancelModeAuth)  cancelModeAuth.addEventListener('click',  function() { setCancelMode(false); });
+        if (cancelModeGuest) cancelModeGuest.addEventListener('click', function() { setCancelMode(true);  });
+
+        // ── Cancel Order — submit ───────────────────────────────────────────
+        if (cancelOrderBtn) {
+            cancelOrderBtn.addEventListener('click', async function() {
+                if (cancelOrderStatus) cancelOrderStatus.textContent = '';
+
+                const orderId = cancelOrderInput ? cancelOrderInput.value.trim() : '';
+                if (!orderId) {
+                    if (cancelOrderStatus) {
+                        cancelOrderStatus.textContent = '❌ Please enter a valid Order ID.';
+                        cancelOrderStatus.className = 'mt-3 text-xs font-mono text-red-400';
+                    }
+                    return;
+                }
+
+                if (!confirm('Are you sure you want to cancel Order ID: ' + orderId + '?')) return;
+
+                try {
+                    let res, data;
+
+                    if (!isGuestCancelMode) {
+                        // ── Path A: logged-in user — JWT Bearer token ──
+                        const token = localStorage.getItem('authToken');
+                        if (!token) {
+                            if (cancelOrderStatus) {
+                                cancelOrderStatus.textContent = '❌ You are not logged in. Switch to "Guest" mode if you placed the order without an account.';
+                                cancelOrderStatus.className = 'mt-3 text-xs font-mono text-red-400';
+                            }
+                            return;
+                        }
+                        res = await fetch('/api/v1/order/status', {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify({ order_id: orderId, status: 'cancelled' })
+                        });
+
+                    } else {
+                        // ── Path B: guest — one-time cancellation token ──
+                        const guestTok = cancelGuestToken ? cancelGuestToken.value.trim() : '';
+                        if (!guestTok) {
+                            if (cancelOrderStatus) {
+                                cancelOrderStatus.textContent = '❌ Please paste your guest cancellation token.';
+                                cancelOrderStatus.className = 'mt-3 text-xs font-mono text-red-400';
+                            }
+                            return;
+                        }
+                        res = await fetch('/api/v1/order/cancel-guest', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ order_id: orderId, guest_cancel_token: guestTok })
+                        });
+                    }
+
+                    data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        // Normalise detail — may be string or Pydantic array
+                        const detail = data.detail;
+                        const msg = Array.isArray(detail)
+                            ? detail.map(function(e) { return e.msg || JSON.stringify(e); }).join('; ')
+                            : (detail || 'Failed to cancel order.');
+                        throw new Error(msg);
+                    }
+
+                    if (cancelOrderStatus) {
+                        cancelOrderStatus.textContent = '✅ ' + (data.message || 'Order cancelled.');
+                        cancelOrderStatus.className = 'mt-3 text-xs font-mono text-green-400';
+                    }
+                    if (cancelOrderInput) cancelOrderInput.value = '';
+                    if (cancelGuestToken) cancelGuestToken.value = '';
+
+                } catch (err) {
+                    if (cancelOrderStatus) {
+                        cancelOrderStatus.textContent = '❌ ' + err.message;
+                        cancelOrderStatus.className = 'mt-3 text-xs font-mono text-red-400';
+                    }
+                }
+            });
+        }
+
+        // ─── Mobile Home Button ──────────────────────────────
+        const mobileHomeBtn = document.getElementById('mobileHomeMenuBtn');
+        if (mobileHomeBtn) {
+            mobileHomeBtn.addEventListener('click', function() {
+                if (modal) modal.classList.remove('hidden');
+                switchTab('login');
+            });
+        }
+
+        console.log(
+            '%c XORE Pure Android %c Ready ',
+            'background:#0b0f19;color:#00f0ff;padding:6px 10px;font-family:monospace;font-weight:bold;border:1px solid #00f0ff;',
+            'color:#a0b4cc;'
+        );
+
+        
+        // Listen for height updates from user_form.html iframe
+         window.addEventListener('message', function(e) {
+            if (e.origin !== window.location.origin) return;
+            if (e.data && e.data.type === 'xore-resize') {
+                const iframe = document.getElementById('modalFormFrame');
+                if (iframe) {
+                    const safeHeight = Math.max(400, Math.min(Number(e.data.height) || 0, 8000));
+                    const scrollY = window.scrollY || window.pageYOffset;
+                    iframe.style.height = (safeHeight + 32) + 'px';
+                    window.scrollTo({ top: scrollY, behavior: 'instant' });
+                }
+            }
+
+            // FIX: when a guest submits an order, validation.js posts their
+            // one-time cancellation token up here.  We pre-fill the Cancel tab
+            // fields so the user can immediately see and copy their token inside
+            // the dashboard modal without having to manually copy a long JWT.
+            if (e.data && e.data.type === 'xore-guest-token') {
+                var cancelOrderIdInput = document.getElementById('cancelOrderId');
+                var cancelGuestToken   = document.getElementById('cancelGuestToken');
+                var cancelModeGuestBtn = document.getElementById('cancelModeGuest');
+                if (cancelOrderIdInput) cancelOrderIdInput.value = e.data.order_id        || '';
+                if (cancelGuestToken)   cancelGuestToken.value   = e.data.guest_cancel_token || '';
+                // Switch the cancel form to guest mode automatically
+                if (cancelModeGuestBtn) cancelModeGuestBtn.click();
+            }
+        });
+
+        // FIX #1 — Iframe affiliate tracking.
+        // The form lives inside an <iframe> so it cannot read the parent URL.
+        // We read ?partner_id=XOR-123 here (in the parent) and post it down to
+        // the iframe as soon as it finishes loading.  The iframe's validation.js
+        // listens for this message and populates the hidden partnerShopId input.
+        (function injectPartnerIdToIframe() {
+            var urlParams   = new URLSearchParams(window.location.search);
+            var partnerId   = urlParams.get('partner_id');
+            if (!partnerId) return;               // no affiliate link — nothing to do
+
+            var iframe = document.getElementById('modalFormFrame');
+            if (!iframe) return;
+
+            function postPartnerId() {
+                try {
+                    iframe.contentWindow.postMessage(
+                        { type: 'xore-partner-id', partner_id: partnerId },
+                        window.location.origin   // same-origin only — never '*'
+                    );
+                } catch (_) {}
+            }
+
+            // Post on load (handles the case where the iframe loads after this script runs)
+            iframe.addEventListener('load', postPartnerId);
+            // Also post immediately in case the iframe is already loaded
+            if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                postPartnerId();
+            }
+        })();
+
+    })();
+});
+</script>
+</body>
+</html>

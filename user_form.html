@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XORE Device Ingestion Form</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Tailwind config for brand colors and fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: {
+                            DEFAULT: '#0b0f19',
+                            deep: '#070a12',
+                            elevated: '#111827',
+                            card: '#141c2b',
+                        },
+                        neon: {
+                            cyan: '#00f0ff',
+                            'cyan-dim': 'rgba(0,240,255,0.18)',
+                            'cyan-glow': 'rgba(0,240,255,0.45)',
+                            magenta: '#d400ff',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    borderWidth: { '6': '6px' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @layer base {
+            body { background-color: #0b0f19; font-family: 'Inter', sans-serif; }
+
+            .input-glow:focus {
+                box-shadow: 0 0 0 1px rgba(0,240,255,0.8), 0 0 12px rgba(0,240,255,0.3);
+            }
+            .payment-radio:checked + .payment-card {
+                border-color: #00f0ff;
+                box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 40px rgba(0,240,255,0.1);
+                background-color: rgba(0,240,255,0.06);
+            }
+            .payment-radio:checked + .payment-card .payment-indicator {
+                background-color: #00f0ff;
+                box-shadow: 0 0 8px rgba(0,240,255,0.7);
+            }
+
+            /* ── Policy agreement custom checkbox ── */
+            .policy-cb-input {
+                position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+            }
+            .policy-cb-box {
+                display: flex; align-items: center; justify-content: center;
+                width: 18px; height: 18px; flex-shrink: 0;
+                border-radius: 4px; border: 1.5px solid #4b5563;
+                background: #111827;
+                transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+                cursor: pointer;
+            }
+            .policy-cb-input:focus-visible ~ .policy-cb-box {
+                outline: 2px solid rgba(0,240,255,0.75); outline-offset: 2px;
+            }
+            .policy-cb-input:checked ~ .policy-cb-box {
+                background: #00f0ff; border-color: #00f0ff;
+                box-shadow: 0 0 10px rgba(0,240,255,0.55);
+            }
+            .policy-cb-tick { display: none; }
+            .policy-cb-input:checked ~ .policy-cb-box .policy-cb-tick { display: block; }
+            #policyAgreementRow.is-checked {
+                border-color: rgba(0,240,255,0.4) !important;
+                background: rgba(0,240,255,0.035);
+            }
+            #policyAgreementRow.has-error { border-color: rgba(239,68,68,0.6) !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-6 relative">
+
+    <!-- Background grid -->
+    <div class="fixed inset-0 pointer-events-none z-[-1] opacity-20"
+         style="background-image: radial-gradient(circle at 1px 1px, rgba(0,240,255,0.12) 1px, transparent 1px); background-size: 36px 36px;">
+    </div>
+
+    <!-- Main form container -->
+    <div class="w-full max-w-3xl bg-[#0b0f19] border-[6px] border-[#00f0ff]/30 rounded-lg p-6 md:p-8 relative z-10"
+         style="box-shadow: 0 0 0 1px rgba(0,240,255,0.15), 0 20px 40px rgba(0,0,0,0.7), 0 0 40px rgba(0,240,255,0.15);">
+
+        <!-- Corner accents -->
+        <div class="absolute top-0 right-0 w-6 h-6 border-t-[3px] border-r-[3px] border-[#00f0ff] rounded-tr-sm shadow-[0_0_10px_rgba(0,240,255,0.4)]"></div>
+        <div class="absolute bottom-0 left-0 w-6 h-6 border-b-[3px] border-l-[3px] border-[#00f0ff] rounded-bl-sm shadow-[0_0_10px_rgba(0,240,255,0.4)]"></div>
+
+        <!-- Form header -->
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 border border-[#00f0ff] bg-[#111827] flex items-center justify-center rounded shadow-[0_0_12px_rgba(0,240,255,0.3)]">
+                <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold font-mono tracking-tight text-white">
+                    Device <span class="text-[#00f0ff] drop-shadow-[0_0_10px_rgba(0,240,255,0.6)]">Ingestion</span>
+                </h2>
+                <p class="text-sm text-gray-400 font-mono tracking-wide">XORE Pure Android — Debloat Request</p>
+            </div>
+        </div>
+
+        <!-- FORM START -->
+        <!-- novalidate: we handle all validation in validation.js -->
+        <form id="deviceForm" class="space-y-7" novalidate autocomplete="off">
+
+            <!-- Hidden input for partner shop ID. Set via URL param or server injection. -->
+            <input type="hidden" id="partnerShopId" name="partnerShopId" value="">
+
+            <!-- ===== CLIENT DETAILS ===== -->
+            <fieldset class="border border-[#00f0ff]/20 rounded-md p-4 bg-[#0b0f19]/70">
+                <legend class="text-[#00f0ff] font-mono text-sm uppercase tracking-widest px-2 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-[#00f0ff] rounded-full shadow-[0_0_6px_rgba(0,240,255,0.7)]"></span>
+                    Client Information
+                </legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+
+                    <!-- Client Name — letters & spaces only (F1) -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label for="clientName" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            Client Name <span class="text-[#00f0ff]">*</span>
+                        </label>
+                        <input type="text" id="clientName" name="clientName" required
+                               placeholder="e.g. Priya Sharma"
+                               maxlength="50"
+                               autocomplete="name"
+                               inputmode="text"
+                               class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                      focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                      transition-all duration-200 input-glow font-mono text-sm">
+                        <!-- Error: shown by JS when digits/symbols are typed (F1) -->
+                        <p id="clientNameError" class="hidden mt-1 text-xs text-red-400 font-mono">
+                            ⚠ Name must contain letters and spaces only — no numbers or symbols.
+                        </p>
+                    </div>
+
+                    <!-- Mobile Number — 10 digits, starts with 6/7/8/9 (F2) -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label for="mobileNumber" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            Mobile Number <span class="text-[#00f0ff]">*</span>
+                        </label>
+                        <input type="tel" id="mobileNumber" name="mobileNumber" required
+                               placeholder="+91 98765 43210"
+                               maxlength="14"
+                               autocomplete="tel"
+                               inputmode="tel"
+                               class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                      focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                      transition-all duration-200 input-glow font-mono text-sm">
+                        <!-- Error: shown by JS (F2) -->
+                        <p id="mobileNumberError" class="hidden mt-1 text-xs text-red-400 font-mono">
+                            ⚠ Enter a valid Indian number: +91 followed by 10 digits starting with 6, 7, 8, or 9. No letters.
+                        </p>
+                    </div>
+
+                    <!-- Address (F6) -->
+                    <div class="col-span-2">
+                        <label for="address" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            Address <span class="text-[#00f0ff]">*</span>
+                        </label>
+                        <textarea id="address" name="address" rows="2" required
+                                  placeholder="Flat, Building, Area, City, PIN"
+                                  minlength="5"
+                                  class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                         focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                         transition-all duration-200 input-glow font-mono text-sm resize-none"></textarea>
+                        <!-- FIX #3: Error element for address — shown/hidden by validation.js -->
+                        <p id="addressError" class="hidden mt-1 text-xs text-red-400 font-mono">
+                            ⚠ Address is required (minimum 5 characters).
+                        </p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ===== SMARTPHONE DETAILS ===== -->
+            <fieldset class="border border-[#00f0ff]/20 rounded-md p-4 bg-[#0b0f19]/70">
+                <legend class="text-[#00f0ff] font-mono text-sm uppercase tracking-widest px-2 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-[#00f0ff] rounded-full shadow-[0_0_6px_rgba(0,240,255,0.7)]"></span>
+                    Smartphone Details
+                </legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+
+                    <!-- Device Model — must contain letters (F3) -->
+                    <div>
+                        <label for="deviceModel" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            Device Model <span class="text-[#00f0ff]">*</span>
+                        </label>
+                        <input type="text" id="deviceModel" name="deviceModel" required
+                               placeholder="Moto G67 Power"
+                               minlength="3"
+                               maxlength="60"
+                               autocomplete="off"
+                               class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                      focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                      transition-all duration-200 input-glow font-mono text-sm">
+                        <p class="text-xs text-gray-500 mt-1 font-mono">Example: Moto G67 Power, Redmi Note 12, Galaxy A34</p>
+                    </div>
+
+                    <!-- Android Version (optional select) (F8) -->
+                    <div>
+                        <label for="androidVersion" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            Android Version
+                        </label>
+                        <select id="androidVersion" name="androidVersion"
+                                class="w-full bg-[#111827] border border-gray-700 text-white rounded px-4 py-3
+                                       focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                       transition-all duration-200 font-mono text-sm appearance-none bg-no-repeat"
+                                style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2300f0ff\' stroke-width=\'2\'><polyline points=\'6 9 12 15 18 9\'/></svg>'); background-position: right 12px center; background-size: 16px;">
+                            <option value="" disabled selected class="bg-[#111827]">Select your Android version</option>
+                            <option value="7_9"   class="bg-[#111827]">Android 7 to 9 (Boost performance!)</option>
+                            <option value="10"    class="bg-[#111827]">Android 10 (Recommended)</option>
+                            <option value="11"    class="bg-[#111827]">Android 11</option>
+                            <option value="12"    class="bg-[#111827]">Android 12</option>
+                            <option value="13"    class="bg-[#111827]">Android 13</option>
+                            <option value="14_17" class="bg-[#111827]">Android 14 to 17</option>
+                        </select>
+                    </div>
+
+                    <!-- RAM — positive integer, digits only (F4) -->
+                    <div>
+                        <label for="ramInfo" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            RAM in GB (optional)
+                        </label>
+                        <input type="text" id="ramInfo" name="ramInfo"
+                               placeholder="(positive numbers only)"
+                               inputmode="numeric"
+                               maxlength="3"
+                               autocomplete="off"
+                               class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                      focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                      transition-all duration-200 input-glow font-mono text-sm">
+                        <!-- Error: shown by JS (F4) -->
+                        <p id="ramInfoError" class="hidden mt-1 text-xs text-red-400 font-mono">
+                            ⚠ RAM must be a positive whole number (e.g. 2, 3, 4,) — no letters.
+                        </p>
+                    </div>
+
+                    <!-- IMEI — exactly 15 digits, no letters (F5) -->
+                    <div>
+                        <label for="imei" class="block text-sm font-medium text-gray-300 mb-1 font-mono tracking-wide">
+                            IMEI (optional)
+                        </label>
+                        <input type="text" id="imei" name="imei"
+                               placeholder="e.g. 123456789012345"
+                               maxlength="15"
+                               inputmode="numeric"
+                               autocomplete="off"
+                               class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                      focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                      transition-all duration-200 input-glow font-mono text-sm">
+                        <!-- Error: shown by JS (F5) -->
+                        <p id="imeiError" class="hidden mt-1 text-xs text-red-400 font-mono">
+                            ⚠ IMEI must be exactly 15 digits — numbers only, no letters or symbols.
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1 font-mono">Dial *#06# to find your IMEI</p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ===== PAYMENT SELECTION ===== -->
+            <fieldset class="border border-[#00f0ff]/20 rounded-md p-4 bg-[#0b0f19]/70" style="scroll-margin-top: 16px;">
+                <legend class="text-[#00f0ff] font-mono text-sm uppercase tracking-widest px-2 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-[#00f0ff] rounded-full shadow-[0_0_6px_rgba(0,240,255,0.7)]"></span>
+                    Payment Method
+                </legend>
+                <p class="text-xs text-gray-400 mb-3 font-mono">Select your preferred payment option. Details will appear dynamically.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" role="radiogroup" aria-label="Payment method">
+                    <!-- UPI -->
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="upi" class="sr-only payment-radio" required>
+                        <div class="payment-card border border-gray-700 bg-[#111827] rounded-md p-4 transition-all duration-200 hover:border-[#00f0ff]/50 flex flex-col items-center text-center gap-2">
+                            <span class="text-[#00f0ff] text-2xl">₹</span>
+                            <span class="font-mono text-white text-sm font-semibold">UPI</span>
+                            <span class="text-xs text-gray-400">Google Pay / PhonePe</span>
+                            <span class="payment-indicator w-3 h-3 rounded-full border border-gray-500 mt-1"></span>
+                        </div>
+                    </label>
+
+                    <!-- NetBanking -->
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="netbanking" class="sr-only payment-radio">
+                        <div class="payment-card border border-gray-700 bg-[#111827] rounded-md p-4 transition-all duration-200 hover:border-[#00f0ff]/50 flex flex-col items-center text-center gap-2">
+                            <span class="text-[#00f0ff] text-2xl">🏦</span>
+                            <span class="font-mono text-white text-sm font-semibold">NetBanking</span>
+                            <span class="text-xs text-gray-400">All major banks</span>
+                            <span class="payment-indicator w-3 h-3 rounded-full border border-gray-500 mt-1"></span>
+                        </div>
+                    </label>
+
+                    <!-- Cash on Delivery -->
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="cod" class="sr-only payment-radio">
+                        <div class="payment-card border border-gray-700 bg-[#111827] rounded-md p-4 transition-all duration-200 hover:border-[#00f0ff]/50 flex flex-col items-center text-center gap-2">
+                            <span class="text-[#00f0ff] text-2xl">💵</span>
+                            <span class="font-mono text-white text-sm font-semibold">Cash on Delivery</span>
+                            <span class="text-xs text-gray-400">Pay when device is ready</span>
+                            <span class="payment-indicator w-3 h-3 rounded-full border border-gray-500 mt-1"></span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Dynamic payment detail panels -->
+                <div id="paymentDetails" class="mt-4 space-y-3" style="min-height: 90px;">
+
+                    <!-- UPI details (F7: validated in validation.js) -->
+                    <div id="upiDetails" class="hidden payment-detail">
+                        <label for="upiId" class="block text-sm font-medium text-gray-300 mb-1 font-mono">
+                            UPI ID <span class="text-[#00f0ff]">*</span>
+                        </label>
+                        <input type="text" id="upiId" name="upiId"
+                               placeholder="yourname@okhdfcbank"
+                               autocomplete="off"
+                               class="w-full bg-[#111827] border border-gray-700 text-white placeholder-gray-500 rounded px-4 py-3
+                                      focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                      transition-all duration-200 input-glow font-mono text-sm">
+                        <p class="text-xs text-gray-500 mt-1 font-mono">Format: name@bankhandle (e.g. rahul@okhdfcbank)</p>
+                    </div>
+
+                    <!-- NetBanking details — options INSIDE select (Bug #1 fix) -->
+                    <div id="netbankingDetails" class="hidden payment-detail">
+                        <label for="bankSelect" class="block text-sm font-medium text-gray-300 mb-1 font-mono">
+                            Select Bank <span class="text-[#00f0ff]">*</span>
+                        </label>
+                        <select id="bankSelect" name="bankSelect"
+                                class="w-full bg-[#111827] border border-gray-700 text-white rounded px-4 py-3
+                                       focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]/50
+                                       transition-all duration-200 font-mono text-sm appearance-none"
+                                style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%2300f0ff&quot; stroke-width=&quot;2&quot;><polyline points=&quot;6 9 12 15 18 9&quot;/></svg>'); background-position: right 12px center; background-size: 16px;">
+                            <option value="" disabled selected class="bg-[#111827]">Choose bank</option>
+                            <option value="sbi"   class="bg-[#111827]">State Bank of India</option>
+                            <option value="hdfc"  class="bg-[#111827]">HDFC Bank</option>
+                            <option value="icici" class="bg-[#111827]">ICICI Bank</option>
+                            <option value="axis"  class="bg-[#111827]">Axis Bank</option>
+                            <option value="other" class="bg-[#111827]">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- COD details -->
+                    <div id="codDetails" class="hidden payment-detail">
+                        <div class="bg-[#111827] border border-gray-700 rounded p-3 flex items-start gap-2">
+                            <span class="text-[#00f0ff] mt-0.5">ℹ️</span>
+                            <p class="text-sm text-gray-300 font-mono">
+                                Cash on Delivery: Payment of <strong class="text-[#00f0ff]">₹99</strong>
+                                will be collected when your debloated device is handed back. Exact cash preferred.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ===== SERVICE POLICY AGREEMENT ===== -->
+            <div id="policyAgreementRow"
+                 class="border border-[#00f0ff]/20 rounded-md p-4 bg-[#0b0f19]/70 transition-all duration-200">
+
+                <label class="flex items-start gap-3 cursor-pointer select-none group"
+                       for="policyAgreement">
+
+                    <div class="relative mt-0.5" style="width:18px;height:18px;flex-shrink:0;">
+                        <input type="checkbox"
+                               id="policyAgreement"
+                               name="policyAgreement"
+                               required
+                               class="policy-cb-input">
+                        <div class="policy-cb-box">
+                            <svg class="policy-cb-tick" width="10" height="8" viewBox="0 0 10 8"
+                                 fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M1 3.5L3.8 6.5L9 1"
+                                      stroke="#0b0f19" stroke-width="2"
+                                      stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-200 font-mono leading-snug
+                                  group-hover:text-[#00f0ff] transition-colors duration-200">
+                            I agree to the XORE Service Policy
+                            <span class="text-[#00f0ff]">*</span>
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1.5 font-mono leading-relaxed">
+                            I confirm the flat debloating service fee is
+                            <strong class="text-[#00f0ff] text-[13px]">₹99</strong>.
+                            I authorize XORE to safely remove bloatware from my device.
+                            I understand this is irreversible — please back up your data before
+                            dropping off the device.
+                        </p>
+                    </div>
+                </label>
+
+                <p id="policyError"
+                   class="hidden mt-2 ml-[30px] text-xs text-red-400 font-mono flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    You must agree to the service policy before submitting.
+                </p>
+            </div>
+
+            <!-- Submit button -->
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        class="group relative inline-flex items-center gap-2 bg-[#00f0ff] text-[#0b0f19] font-bold font-mono text-sm uppercase tracking-wider px-8 py-3.5 rounded
+                               border border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_35px_rgba(0,240,255,0.7)]
+                               hover:bg-[#00d4e0] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/70
+                               disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span>Submit Debloat Request</span>
+                    <svg class="w-5 h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+        <!-- FORM END -->
+
+        <p class="text-xs text-gray-500 mt-4 text-center font-mono tracking-wider">
+            🔒 Your data is encrypted in transit (TLS) · <span class="text-[#00f0ff]">Safe and secure debloating process.</span>
+        </p>
+    </div>
+
+    <!--
+        All validation, real-time input enforcement, and form submission
+        are handled by the external validation.js file.
+        Load it AFTER the DOM so getElementById calls work immediately.
+    -->
+    <script src="validation.js"></script>
+</body>
+</html>
