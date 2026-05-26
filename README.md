@@ -106,3 +106,12 @@ The system allows users to submit debloat requests (with full client, device, an
 - All input validation is performed server-side; client validation exists purely for UX.
 - Guest cancellation tokens are cryptographically signed and expire after 7 days.
 - Designed to run behind a reverse proxy (like Nginx) or directly via Uvicorn with TLS 1.3 in production.
+---
+
+## 👨‍💻 Author
+
+**LALCHAND SAINI** *Backend & System Engineer*
+
+## 📜 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details. Feel free to use, modify, and contribute back!
